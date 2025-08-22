@@ -361,8 +361,8 @@ def run_simulator(sim: sim_utils.SimulationContext,
                 f"[INFO]: Motion saved to wandb registry: {REGISTRY}/{COLLECTION}"
             )
             break
-        # close sim app
-        simulation_app.close()
+    # close sim app
+    simulation_app.close()
 
 
 def main():
