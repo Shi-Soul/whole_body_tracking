@@ -128,10 +128,10 @@ class MotionLoader:
                 ))
         motion = motion.to(torch.float32).to(self.device)
         self.motion_base_poss_input = motion[:, :3]
-        self.motion_base_rots_input = motion[:, 3:7]
+        self.motion_base_rots_input = motion[:, 3:7]  # XYZW
         self.motion_base_rots_input = self.motion_base_rots_input[:, [
             3, 0, 1, 2
-        ]]  # convert to wxyz
+        ]]  # convert xyzw to wxyz
         self.motion_dof_poss_input = motion[:, 7:]
 
         self.input_frames = motion.shape[0]
@@ -221,14 +221,14 @@ class MotionLoader:
 
     def get_next_state(
         self,
-    ) -> tuple[
+    ) -> tuple[tuple[
             torch.Tensor,
             torch.Tensor,
             torch.Tensor,
             torch.Tensor,
             torch.Tensor,
             torch.Tensor,
-    ]:
+    ], bool]:
         """Gets the next state of the motion."""
         state = (
             self.motion_base_poss[self.current_idx:self.current_idx + 1],
@@ -246,11 +246,13 @@ class MotionLoader:
         return state, reset_flag
 
 
-def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene,
-                  joint_names: list[str]):
+def run_simulator(sim: sim_utils.SimulationContext,
+                  scene: InteractiveScene,
+                  joint_names: list[str],
+                  MotionLoaderCls=MotionLoader):
     """Runs the simulation loop."""
     # Load motion
-    motion = MotionLoader(
+    motion = MotionLoaderCls(
         motion_file=args_cli.input_file,
         input_fps=args_cli.input_fps,
         output_fps=args_cli.output_fps,
